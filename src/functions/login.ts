@@ -113,7 +113,7 @@ export async function login(
       userId: user.userId,
       email: user.email,
       sessionId,
-      via: "otp" as const, // reuse the "otp" slot for credential-based auth; new enum value will follow once the event schema is bumped
+      via: "password" as const,
       authenticatedAt: now.toISOString(),
     },
     identity: systemIdentity(),

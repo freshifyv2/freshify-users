@@ -139,7 +139,7 @@ export async function register(
         userId: user.userId,
         email: user.email,
         displayName: user.displayName,
-        via: "invite" as const, // password sign-up reuses the "invite" enum slot for now
+        via: "password" as const,
         createdAt: now.toISOString(),
       },
       identity: systemIdentity(),

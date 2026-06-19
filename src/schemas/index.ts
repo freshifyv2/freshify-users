@@ -109,7 +109,7 @@ export const UserCreatedPayload = z.object({
   userId: z.string(),
   email: z.string(),
   displayName: z.string().nullable(),
-  via: z.enum(["otp", "invite"]),
+  via: z.enum(["otp", "invite", "password"]),
   createdAt: z.string(),
 });
 export type UserCreatedPayload = z.infer<typeof UserCreatedPayload>;
@@ -128,7 +128,7 @@ export const UserAuthenticatedPayload = z.object({
   userId: z.string(),
   email: z.string(),
   sessionId: z.string(),
-  via: z.enum(["otp", "invite"]),
+  via: z.enum(["otp", "invite", "password"]),
   authenticatedAt: z.string(),
 });
 export type UserAuthenticatedPayload = z.infer<typeof UserAuthenticatedPayload>;
