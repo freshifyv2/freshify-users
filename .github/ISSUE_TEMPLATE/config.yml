@@ -1,0 +1,17 @@
+blank_issues_enabled: false
+contact_links:
+  - name: 💬 Ask a question or discuss an idea
+    url: https://github.com/freshifyv2/freshify-sovereign-portal/discussions
+    about: General questions, architecture discussions, and "how would I do X" belong in Discussions. The community answers; maintainers read but do not promise response times.
+
+  - name: 🔒 Report a security vulnerability
+    url: https://github.com/freshifyv2/freshify-sovereign-portal/security/advisories/new
+    about: Do not open a public issue for security disclosures. Use a private security advisory, or email security@freshify.io. See SECURITY.md for the full process.
+
+  - name: 🏗️ Get hands-on help with a production deployment
+    url: https://github.com/freshifyv2/freshify-sovereign-portal/blob/main/SUPPORT.md
+    about: Community support is free and best-effort. For SLA-bound response, architecture review, AI maintenance, or having Freshify build modules for you, see SUPPORT.md.
+
+  - name: 📖 Read the documentation first
+    url: https://github.com/freshifyv2/freshify-sovereign-portal#readme
+    about: The README, quickstart, SMI spec, 4-layer permission model, registry+settings spec, and anti-patterns catalog cover most questions. Please read before opening an issue.
