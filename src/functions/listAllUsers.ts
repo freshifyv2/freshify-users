@@ -1,8 +1,16 @@
 /**
- * listAllUsers — cross-tenant user listing for Freshify operators.
+ * listAllUsers — cross-tenant user listing for the Sovereign Portal.
  *
- * Operator-only endpoint. Returns all users across every tenant with their
- * basic profile fields enriched by sibling sovereign module data.
+ * Visible to callers who hold an explicit Module Admin grant for the
+ * `users` module in `module_admins` (Sprint 4 Phase B data model).
+ * Returns all users across every tenant with their basic profile fields
+ * enriched by sibling sovereign module data.
+ *
+ * Sprint 5 — operator bypass drop. Before Sprint 5 the endpoint short-
+ * circuited on `ctx.identity.operator === true`. That implicit operator-
+ * everywhere read is gone; access now comes from a grant row, not a
+ * code-path bypass. The operator account was promoted via the Sprint 5
+ * seed script before this commit shipped.
  *
  * Cross-service enrichment (sovereign architecture — Users does NOT own
  * company memberships):
@@ -12,7 +20,7 @@
  *     (one call per user, parallel)
  *
  * Both calls degrade gracefully to empty arrays on sibling failure — the
- * operator list page never crashes due to a sibling outage.
+ * admin list page never crashes due to a sibling outage.
  *
  * Previous implementation read `user_company_memberships` from the local Users
  * DB; that collection is dead state since Companies BE became the source of
@@ -22,6 +30,7 @@ import type { Db } from "mongodb";
 import type { Logger } from "pino";
 import type { IdentityContext } from "../vendor/authz";
 import { collections } from "../mongo";
+import { isModuleAdmin } from "../lib/isModuleAdmin";
 import {
   fetchCompanyMembershipsForUser,
   fetchWorkspaceMembershipsForUser,
@@ -62,8 +71,8 @@ export async function listAllUsers(
     identity: IdentityContext;
   },
 ): Promise<ListAllUsersOutput> {
-  if (!ctx.identity.operator) {
-    const err = new Error("operator_required");
+  if (!(await isModuleAdmin(ctx.db, ctx.identity))) {
+    const err = new Error("module_admin_required");
     (err as Error & { status?: number }).status = 403;
     throw err;
   }
