@@ -2,6 +2,8 @@
   "name": "freshify-users",
   "version": "0.1.0",
   "private": true,
+  "license": "Apache-2.0",
+  "author": "Freshify, Inc.",
   "description": "Users sovereign module — Sovereign Portal foundation. SMI v0.1 conformant.",
   "scripts": {
     "dev": "tsx watch src/server.ts",
