@@ -65,6 +65,14 @@ import { migrateSchemaV3 } from "./functions/migrateSchemaV3";
 // Deploy 5 — portal-wide audit feed
 import { getPortalAuditFeed } from "./functions/getPortalAuditFeed";
 
+// Sprint 4 — Module Registry Settings (Phase B) + getModuleInfo
+import { getModuleSettings } from "./functions/getModuleSettings";
+import { updateModuleSettings } from "./functions/updateModuleSettings";
+import { listModuleAdmins } from "./functions/listModuleAdmins";
+import { addModuleAdmin } from "./functions/addModuleAdmin";
+import { removeModuleAdmin } from "./functions/removeModuleAdmin";
+import { getModuleInfo } from "./functions/getModuleInfo";
+
 const logger = pino({
   level: process.env.LOG_LEVEL ?? "info",
   base: { service: "freshify-users", version: descriptor.version },
@@ -1616,6 +1624,100 @@ app.get(
     const out = await getUsersStats({
       db,
       identity: req.identity!,
+    });
+    res.json(out);
+  }),
+);
+
+// ===================================================================
+// Sprint 4 — Module Registry Settings (Phase B) + getModuleInfo
+//
+// Portal-scope module registry surface for the Users module:
+//   - GET    /v1/modules/users/settings
+//   - PUT    /v1/modules/users/settings           (operator-only)
+//   - GET    /v1/modules/users/admins
+//   - POST   /v1/modules/users/admins             (operator-only)
+//   - DELETE /v1/modules/users/admins/:userId     (operator-only)
+//   - GET    /v1/modules/users/info               (authenticated, read-only)
+// ===================================================================
+app.get(
+  "/v1/modules/users/settings",
+  requireUser(),
+  wrap(async (req: Request, res: Response) => {
+    const db = await getDb(logger);
+    const out = await getModuleSettings({}, {
+      db,
+      identity: req.identity!,
+      logger,
+    });
+    res.json(out);
+  }),
+);
+
+app.put(
+  "/v1/modules/users/settings",
+  requireUser(),
+  wrap(async (req: Request, res: Response) => {
+    const db = await getDb(logger);
+    const out = await updateModuleSettings(req.body, {
+      db,
+      identity: req.identity!,
+      logger,
+    });
+    res.json(out);
+  }),
+);
+
+app.get(
+  "/v1/modules/users/admins",
+  requireUser(),
+  wrap(async (req: Request, res: Response) => {
+    const db = await getDb(logger);
+    const out = await listModuleAdmins({}, {
+      db,
+      identity: req.identity!,
+      logger,
+    });
+    res.json(out);
+  }),
+);
+
+app.post(
+  "/v1/modules/users/admins",
+  requireUser(),
+  wrap(async (req: Request, res: Response) => {
+    const db = await getDb(logger);
+    const out = await addModuleAdmin(req.body, {
+      db,
+      identity: req.identity!,
+      logger,
+    });
+    res.json(out);
+  }),
+);
+
+app.delete(
+  "/v1/modules/users/admins/:userId",
+  requireUser(),
+  wrap(async (req: Request, res: Response) => {
+    const db = await getDb(logger);
+    const out = await removeModuleAdmin(
+      { userId: String(req.params.userId ?? "") },
+      { db, identity: req.identity!, logger },
+    );
+    res.json(out);
+  }),
+);
+
+app.get(
+  "/v1/modules/users/info",
+  requireUser(),
+  wrap(async (req: Request, res: Response) => {
+    const db = await getDb(logger);
+    const out = await getModuleInfo({}, {
+      db,
+      identity: req.identity!,
+      logger,
     });
     res.json(out);
   }),

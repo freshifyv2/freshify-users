@@ -9,6 +9,15 @@
 import { MongoClient, Db, Collection } from "mongodb";
 import type { Logger } from "pino";
 
+// Sprint 4 — Module Registry Settings (Phase B): the canonical ModuleAdminDoc
+// and ModuleSettingsDoc shapes now live in the sovereign types modules. We
+// re-export them here so existing call sites that import these doc types from
+// `../mongo` (bootstrap rule, audit log writers) keep compiling.
+export type { ModuleAdminDoc } from "./types/moduleAdmin";
+export type { ModuleSettingsDoc } from "./types/moduleSettings";
+import type { ModuleAdminDoc as ModuleAdminDocType } from "./types/moduleAdmin";
+import type { ModuleSettingsDoc as ModuleSettingsDocType } from "./types/moduleSettings";
+
 const DB_NAME = "freshify_users";
 
 let client: MongoClient | null = null;
@@ -120,6 +129,17 @@ async function ensureIndexes(db: Db, logger: Logger): Promise<void> {
     .collection("module_admins")
     .createIndex({ moduleKey: 1, tenantScope: 1, tenantId: 1 });
 
+  // Sprint 4 — Module Registry Settings (Phase B). One row per
+  // (moduleKey, tenantScope, tenantId). The Users module currently stores a
+  // single portal-scope row keyed `moduleKey="users", tenantScope="portal",
+  // tenantId="singleton"`. Per-tenant rows are reserved for a later phase.
+  await db
+    .collection("module_settings")
+    .createIndex(
+      { moduleKey: 1, tenantScope: 1, tenantId: 1 },
+      { unique: true },
+    );
+
   // role_catalogs: one current document per (scope, moduleKey). version is
   // monotonic; older versions are kept for audit.
   await db
@@ -230,8 +250,12 @@ export const collections = {
   userTypeExtensions: (db: Db): Collection<UserTypeExtensionDoc> =>
     db.collection<UserTypeExtensionDoc>("user_type_extensions"),
   // Sprint 1 5.18f — Module Admins for the Users module.
-  moduleAdmins: (db: Db): Collection<ModuleAdminDoc> =>
-    db.collection<ModuleAdminDoc>("module_admins"),
+  moduleAdmins: (db: Db): Collection<ModuleAdminDocType> =>
+    db.collection<ModuleAdminDocType>("module_admins"),
+  // Sprint 4 — Module Registry Settings (Phase B). Portal-scope singleton row
+  // per module; per-tenant rows reserved for a later phase.
+  moduleSettings: (db: Db): Collection<ModuleSettingsDocType> =>
+    db.collection<ModuleSettingsDocType>("module_settings"),
   // Deploy 5 — portal-scope audit log
   portalAuditLog: (db: Db): Collection<PortalAuditDoc> =>
     db.collection<PortalAuditDoc>("portal_audit_log"),
@@ -242,15 +266,10 @@ export const collections = {
 // scope. Inserted by the bootstrap rule the first time a tenant gains its
 // first member, or by an explicit admin grant from an existing Module
 // Admin (RLG/URM grant flows — out of scope for 5.18f).
-export interface ModuleAdminDoc {
-  moduleKey: string; // e.g. "users", "companies", "workspaces"
-  tenantScope: "company" | "workspace" | "portal";
-  tenantId: string | null; // null only when tenantScope === "portal"
-  userId: string;
-  grantedAt: Date;
-  grantedBy: string | null; // null when granted by bootstrap rule
-  source: "bootstrap" | "manual"; // bootstrap = first-user auto-promotion
-}
+//
+// Sprint 4 — the canonical interface now lives in `./types/moduleAdmin` and
+// is re-exported at the top of this file. The shape is unchanged.
+// (See the `export type { ModuleAdminDoc } ...` re-export above.)
 
 // Deploy 5 — portal-scope audit log row. Append-only. Mirrors the shape of
 // CompanyAuditDoc and WorkspaceAuditDoc so the aggregator can union them.
