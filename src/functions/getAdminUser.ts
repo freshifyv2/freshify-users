@@ -70,10 +70,10 @@ export async function getAdminUser(
     userId: userDoc.userId,
     displayName: userDoc.displayName,
     email: userDoc.email,
-    handle: null,
-    title: null,
+    handle: userDoc.username ?? null,
+    title: userDoc.title ?? null,
     phone: userDoc.phoneE164,
-    lastActiveAt: null,
+    lastActiveAt: userDoc.lastActivityAt ? userDoc.lastActivityAt.toISOString() : null,
     status,
     assignedCompanies: companyMemberships.map((m, idx) => ({
       companyId: m.companyId,

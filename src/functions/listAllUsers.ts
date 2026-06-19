@@ -107,10 +107,10 @@ export async function listAllUsers(
         userId: u.userId,
         displayName: u.displayName,
         email: u.email,
-        handle: null,
-        title: null,
+        handle: u.username ?? null,
+        title: u.title ?? null,
         phone: u.phoneE164,
-        lastActiveAt: null,
+        lastActiveAt: u.lastActivityAt ? u.lastActivityAt.toISOString() : null,
         status,
         assignedCompanies: companyMemberships.map((m, idx) => ({
           companyId: m.companyId,
