@@ -539,18 +539,37 @@ app.post(
     const { newId } = await import("./identity");
 
     // ── Bootstrap mode: full upsert by phone ────────────────────────────────
-    if (body.phone) {
-      const { phone, email, firstName, lastName, companyId, workspaceIds } = body;
-
-      if (!phone || !firstName || !lastName) {
-        res.status(400).json({ error: "phone, firstName, lastName required for bootstrap mode" });
-        return;
-      }
+    // When no body fields are provided, the route seeds an OSS-default
+    // operator so a fresh portal install lands with working credentials.
+    // Defaults are overridable via env (SEED_OPERATOR_*) or body fields.
+    const hasAnyBootstrapField =
+      !!body.phone || !!body.email || !!body.firstName || !!body.lastName;
+    if (hasAnyBootstrapField || !body.userId) {
+      const phone =
+        body.phone ?? process.env.SEED_OPERATOR_PHONE ?? "+16085550199";
+      const email = (
+        body.email ??
+        process.env.SEED_OPERATOR_EMAIL ??
+        "operator@sovereign.local"
+      ).toLowerCase();
+      const firstName =
+        body.firstName ?? process.env.SEED_OPERATOR_FIRST_NAME ?? "Portal";
+      const lastName =
+        body.lastName ?? process.env.SEED_OPERATOR_LAST_NAME ?? "Operator";
+      const password =
+        process.env.SEED_OPERATOR_PASSWORD ?? "sovereign-portal-admin";
+      const { companyId, workspaceIds } = body;
 
       const displayName = `${firstName} ${lastName}`.trim();
-      const resolvedEmail = email
-        ? email.toLowerCase()
-        : `phone+${phone.replace(/[^0-9+]/g, "")}@users.freshify.io`;
+      const resolvedEmail = email;
+
+      // Hash the seed password so email+password login works immediately.
+      const passwordAdapterMod = await import("./auth");
+      const seededAdapter = passwordAdapterMod.getPasswordAdapter(logger);
+      const { hash: passwordHash } = await seededAdapter.hashPassword(
+        password,
+        logger,
+      );
 
       const now = new Date();
       const usersCol = db.collection<{
@@ -561,6 +580,8 @@ app.post(
         createdAt: Date;
         updatedAt: Date;
         status: string;
+        passwordHash?: string | null;
+        emailVerifiedAt?: Date | null;
       }>("users");
 
       // Upsert by phone (primary) or email
@@ -580,6 +601,8 @@ app.post(
               email: resolvedEmail,
               phoneE164: phone,
               status: "active",
+              passwordHash,
+              emailVerifiedAt: userDoc.emailVerifiedAt ?? now,
               updatedAt: now,
             },
           },
@@ -595,6 +618,8 @@ app.post(
           createdAt: now,
           updatedAt: now,
           status: "active",
+          passwordHash,
+          emailVerifiedAt: now,
         });
         logger.info({ userId }, "seed_operator_bootstrap_created_user");
       }
@@ -669,12 +694,28 @@ app.post(
         }
       }
 
-      logger.info({ userId, displayName, companyId, workspaceIds }, "seed_operator_bootstrap_complete");
+      logger.info(
+        { userId, displayName, email: resolvedEmail, companyId, workspaceIds },
+        "seed_operator_bootstrap_complete",
+      );
+      logger.info(
+        {
+          email: resolvedEmail,
+          phone,
+          otpBypassCode: bypassCode,
+        },
+        "seed_operator_credentials",
+      );
       res.json({
         ok: true,
         userId,
         displayName,
         email: resolvedEmail,
+        phone,
+        password,
+        otpBypassCode: bypassCode,
+        credentialsHint:
+          "Sign in with email+password OR phone+OTP. These are dev defaults — override via SEED_OPERATOR_* env vars or rotate immediately for production.",
         reason: "audit",
         companyId: companyId ?? null,
         workspaceIds: assignedWorkspaceIds,
