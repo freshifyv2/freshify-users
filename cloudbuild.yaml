@@ -56,13 +56,16 @@ steps:
       # DEV_OTP_BYPASS=1 accepts the fixed code 424242 for ANY identifier,
       # ONLY when Twilio is not configured. Auto-disabled when any TWILIO_*
       # env var is present. For sales-demo logins shared verbally by Timothy.
-      # INTERNAL_S2S_SECRET — shared across freshify-users / -companies / -workspaces.
-      # Used by /v1/internal/* routes for cross-service membership resolution.
-      # Rotate together across all three services.
+      # INTERNAL_S2S_SECRET — shared across freshify-users / -companies /
+      # -workspaces. Used by /v1/internal/* routes for cross-service
+      # membership resolution. Rotate together across all three services
+      # by adding a new version in Secret Manager. The value is bound below
+      # via --set-secrets so it never appears in the build log or in repo
+      # history.
       # COMMS_URL and PORTAL_PUBLIC_URL are plain env. COMMS_SHARED_SECRET
       # is pulled from Secret Manager (see --set-secrets below) and must be
       # the same value set on freshify-comms.
-      - --set-env-vars=NODE_ENV=production,LOG_LEVEL=info,DEV_OTP_PEEK=1,DEV_OTP_BYPASS=1,INTERNAL_S2S_SECRET=REDACTED_INTERNAL_S2S_SECRET,COMMS_URL=https://freshify-comms-sbzaekoo4q-uc.a.run.app,PORTAL_PUBLIC_URL=https://freshify-portal-shell-sbzaekoo4q-uc.a.run.app
+      - --set-env-vars=NODE_ENV=production,LOG_LEVEL=info,DEV_OTP_PEEK=1,DEV_OTP_BYPASS=1,COMMS_URL=https://freshify-comms-sbzaekoo4q-uc.a.run.app,PORTAL_PUBLIC_URL=https://freshify-portal-shell-sbzaekoo4q-uc.a.run.app
       # Twilio secrets omitted for now — adapter falls back to console-log OTP.
       # Add back when real Twilio creds are wired up:
       #   TWILIO_ACCOUNT_SID=TWILIO_ACCOUNT_SID:latest,TWILIO_AUTH_TOKEN=TWILIO_AUTH_TOKEN:latest,TWILIO_VERIFY_SERVICE_SID=TWILIO_VERIFY_SERVICE_SID:latest
@@ -70,7 +73,7 @@ steps:
       # the operator creates the Secret Manager entry, invite emails skip
       # gracefully and stamp emailSendError=comms_secret_not_configured.
       # See freshify-comms/cloudbuild.yaml for the one-time setup commands.
-      - --set-secrets=MONGODB_URI=MONGODB_URI:latest,JWT_SECRET=JWT_SECRET:latest
+      - --set-secrets=MONGODB_URI=MONGODB_URI:latest,JWT_SECRET=JWT_SECRET:latest,INTERNAL_S2S_SECRET=INTERNAL_S2S_SECRET:latest
     waitFor: ["push-sha"]
 
 images:
