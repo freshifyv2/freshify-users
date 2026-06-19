@@ -139,4 +139,4 @@ If your employer claims rights to code you write, get sign-off before contributi
 
 ---
 
-*Thanks for reading. The faster you can match the bar, the faster your PR lands.*
+Thanks for reading. The faster you can match the bar, the faster your PR lands.

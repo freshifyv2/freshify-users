@@ -89,4 +89,4 @@ Either way is a good outcome. Choose the one that fits.
 
 ---
 
-*Last updated: June 2026.*
+Last updated: June 2026.

@@ -21,7 +21,7 @@ Frontend counterpart: [`freshify-users-fe`](https://github.com/freshifyv2/freshi
 
 ```bash
 npm install
-cp .env.example .env  # set MONGO_URI, USER_JWT_SECRET, COMMS_BASE_URL
+cp .env.example .env  # set MONGODB_URI, JWT_SECRET, COMMS_URL, etc.
 npm run dev
 ```
 
@@ -31,10 +31,15 @@ Defaults to `http://localhost:8080`. The first boot bootstraps the Module Admin 
 
 | Variable | Required | Notes |
 |---|---|---|
-| `MONGO_URI` | yes | MongoDB connection string |
-| `USER_JWT_SECRET` | yes | HS256 signing secret for user sessions |
-| `SERVICE_PRINCIPAL_SECRET` | yes | Shared secret for peer-to-peer SMI calls |
-| `COMMS_BASE_URL` | yes | `freshify-comms` URL for sending verification + reset emails |
+| `MONGODB_URI` | yes | MongoDB connection string |
+| `JWT_SECRET` | yes | HS256 signing secret for user sessions |
+| `INTERNAL_S2S_SECRET` | yes | Shared secret for peer-to-peer SMI calls between sovereign modules |
+| `COMMS_SHARED_SECRET` | yes | Shared secret for calls into `freshify-comms` |
+| `COMMS_URL` | yes | `freshify-comms` URL for sending verification + reset emails |
+| `COMPANIES_SERVICE_URL` | yes | `freshify-companies` base URL |
+| `WORKSPACES_SERVICE_URL` | yes | `freshify-workspaces` base URL |
+| `PORTAL_PUBLIC_URL` | yes | Public URL of the portal shell, used in verification + reset links |
+| `TWILIO_*` | no | Account SID / Auth Token / Verify Service SID. When unset, OTP falls back to a console-log adapter (dev only). |
 | `PORT` | no | Defaults to `8080` |
 
 ## Conformance

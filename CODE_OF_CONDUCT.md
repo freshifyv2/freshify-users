@@ -56,4 +56,4 @@ This Code of Conduct is loosely based on the [Contributor Covenant](https://www.
 
 ---
 
-*Last updated: June 2026.*
+Last updated: June 2026.

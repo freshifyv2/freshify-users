@@ -88,4 +88,4 @@ Security advisories are published at https://github.com/sovereign-portal/soverei
 
 ---
 
-*The security of Sovereign Portal deployments depends on responsible disclosure. Thank you for taking the time to report what you find.*
+The security of Sovereign Portal deployments depends on responsible disclosure. Thank you for taking the time to report what you find.
