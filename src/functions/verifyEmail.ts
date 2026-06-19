@@ -27,6 +27,7 @@ import { VerifyEmailInput, VerifyEmailOutput } from "../schemas";
 import { collections, type UserDoc } from "../mongo";
 import { issueSessionToken, newId } from "../identity";
 import { getOperatorAssignment } from "../operators";
+import { ensureOperatorPortalAdmin } from "./ensureOperatorPortalAdmin";
 import type { Publisher } from "../events/publisher";
 import { systemIdentity } from "../events/publisher";
 
@@ -84,6 +85,9 @@ export async function verifyEmail(
   const operatorClaim = operatorAssignment
     ? { operatorId: user.userId, reason: operatorAssignment.reason }
     : null;
+  if (operatorClaim) {
+    await ensureOperatorPortalAdmin(ctx.db, ctx.logger, user.userId);
+  }
 
   const session = issueSessionToken({
     userId: user.userId,

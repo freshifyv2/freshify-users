@@ -17,6 +17,7 @@ import { VerifyOtpInput, VerifyOtpOutput } from "../schemas";
 import { collections, type UserDoc } from "../mongo";
 import { issueSessionToken, newId } from "../identity";
 import { getOperatorAssignment } from "../operators";
+import { ensureOperatorPortalAdmin } from "./ensureOperatorPortalAdmin";
 import type { AuthAdapter } from "../auth";
 import type { Publisher } from "../events/publisher";
 import { systemIdentity } from "../events/publisher";
@@ -165,6 +166,9 @@ export async function verifyOtp(
   const operatorClaim = operatorAssignment
     ? { operatorId: user.userId, reason: operatorAssignment.reason }
     : null;
+  if (operatorClaim) {
+    await ensureOperatorPortalAdmin(ctx.db, ctx.logger, user.userId);
+  }
 
   // Issue session with no company context. The FE is expected to call
   // GET /v1/companies, present an account switcher (or auto-pick the only

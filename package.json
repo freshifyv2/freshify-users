@@ -1,7 +1,7 @@
 {
   "name": "freshify-users",
   "version": "0.1.0",
-  "description": "Users sovereign module \u2014 Sovereign Portal foundation. SMI v0.1 conformant.",
+  "description": "Users sovereign module — Sovereign Portal foundation. SMI v0.1 conformant.",
   "license": "Apache-2.0",
   "author": "Freshify, Inc. (https://freshify.io)",
   "homepage": "https://github.com/freshifyv2/freshify-users#readme",
@@ -35,7 +35,7 @@
     "@types/jsonwebtoken": "9.0.7",
     "@types/node": "20.14.10",
     "tsx": "4.19.2",
-    "typescript": "5.5.3"
+    "typescript": "^5.5.3"
   },
   "engines": {
     "node": ">=20"

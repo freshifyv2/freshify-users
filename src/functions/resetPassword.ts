@@ -18,6 +18,7 @@ import { ResetPasswordInput, ResetPasswordOutput } from "../schemas";
 import { collections } from "../mongo";
 import { issueSessionToken, newId } from "../identity";
 import { getOperatorAssignment } from "../operators";
+import { ensureOperatorPortalAdmin } from "./ensureOperatorPortalAdmin";
 import type { PasswordAuthAdapter } from "../auth";
 import type { Publisher } from "../events/publisher";
 import { systemIdentity } from "../events/publisher";
@@ -97,6 +98,9 @@ export async function resetPassword(
   const operatorClaim = operatorAssignment
     ? { operatorId: user.userId, reason: operatorAssignment.reason }
     : null;
+  if (operatorClaim) {
+    await ensureOperatorPortalAdmin(ctx.db, ctx.logger, user.userId);
+  }
 
   const session = issueSessionToken({
     userId: user.userId,

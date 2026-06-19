@@ -18,6 +18,7 @@ import type { IdentityContext, RoleAssignment } from "../vendor/authz";
 import { collections } from "../mongo";
 import { issueSessionToken, newId } from "../identity";
 import { getOperatorAssignment } from "../operators";
+import { ensureOperatorPortalAdmin } from "./ensureOperatorPortalAdmin";
 
 const COMPANIES_URL =
   process.env.COMPANIES_SERVICE_URL ||
@@ -101,6 +102,9 @@ export async function selectContext(
   const operatorClaim = operatorAssignment
     ? { operatorId: userId, reason: operatorAssignment.reason }
     : (ctx.identity.operator ?? null);
+  if (operatorClaim) {
+    await ensureOperatorPortalAdmin(ctx.db, ctx.logger, userId);
+  }
 
   // Re-issue session token with the selected context + role.
   const session = issueSessionToken({
