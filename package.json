@@ -35,7 +35,7 @@
     "@types/jsonwebtoken": "9.0.7",
     "@types/node": "20.14.10",
     "tsx": "4.19.2",
-    "typescript": "^5.5.3"
+    "typescript": "5.5.3"
   },
   "engines": {
     "node": ">=20"
